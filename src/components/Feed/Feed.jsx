@@ -1,35 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import db from '../../firebase/config';
 import './Feed.css';
 import MessageSender from './MessageSender/MessageSender';
 import Post from './Post/Post';
 import StoryReel from './StoryReel/StoryReel';
 
 function Feed() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    db.collection('posts')
+      .orderBy('timestamp', 'desc')
+      .onSnapshot((snapshot) => {
+        setPosts(
+          snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() }))
+        );
+      });
+  }, []);
   return (
     <div className="feed">
       <StoryReel />
       <MessageSender />
-      <Post
-        profilePic="https://avatars.githubusercontent.com/u/44520484?v=4"
-        message="Facebook test post"
-        timestamp="time and date"
-        username="Sakil Khan"
-        image="https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg"
-      />
-      <Post
-        profilePic="https://avatars.githubusercontent.com/u/44520484?v=4"
-        message="Facebook test post"
-        timestamp="time and date"
-        username="Sakil Khan"
-        image="https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg"
-      />
-      <Post
-        profilePic="https://avatars.githubusercontent.com/u/44520484?v=4"
-        message="Facebook test post"
-        timestamp="time and date"
-        username="Sakil Khan"
-        image="https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg"
-      />
+      {posts.map((post) => (
+        <Post
+          key={post.data.id}
+          profilePic={post.data.profilePic}
+          message={post.data.message}
+          timestamp={post.data.timestamp}
+          username={post.data.username}
+          image={post.data.image}
+        />
+      ))}
     </div>
   );
 }
